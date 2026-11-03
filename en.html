@@ -6313,6 +6313,8 @@ function cCard(n, m){
     <p style="font-family:var(--serif);font-size:20px;line-height:1.75;margin:0">${esc(m.truth)}</p></div>
   <div class="card"><p class="eyebrow">Three Sentences</p>${m.card.map((x, i) => {
       const k = 'c|' + n + ':0|card|' + i;
+      /* sentence-by-sentence marking: each sentence has its own key (…|card|i|j); old whole-paragraph marks (…|card|i) still show */
+      if (!(S.mk && S.mk[k])) return '<p style="margin:0 0 10px">· ' + MK321.sents(k, x) + '</p>';
       return MK321.wrap(k, '· ' + esc(x),
         { el:'p', cls:'mkp', style:'margin:0 0 10px', noteEl:'div' });
     }).join('')}</div>
@@ -9895,7 +9897,8 @@ function gnTextFor(k){
   }
   if (p[0] === 'c'){
     const m = meta(+p[1].split(':')[0]) || {};
-    return (m.card || [])[+p[3]] || '';
+    const full = (m.card || [])[+p[3]] || '';
+    return p.length < 5 ? full : MK321.sentText(esc(full), +p[4]);
   }
   if (p[0] === 'l') return MK321.sentText(esc(lesRaw(+p[1], +p[2], p[3])), +p[4]);
   const b = VMAP[p[1]]; if (!b) return '';

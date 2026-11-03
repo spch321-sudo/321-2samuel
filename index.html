@@ -5111,6 +5111,8 @@ function cCard(n, m){
     <p style="font-family:var(--serif);font-size:20px;line-height:1.75;margin:0">${esc(m.truth)}</p></div>
   <div class="card"><p class="eyebrow">三句話</p>${m.card.map((x, i) => {
       const k = 'c|' + n + ':0|card|' + i, on = mkHas(k), c = mkColor(k);
+      /* 逐句畫線：每一句各自有 key（…|card|i|j）；舊版整段畫線（…|card|i）仍照舊顯示 */
+      if (!on) return `<p style="margin:0 0 10px">· ${splitHTML(esc(x)).map((t, j) => mkWrap(k + '|' + j, t)).join('')}</p>`;
       return `<p class="mkp${on ? ' hl' : ''}"${c ? ` data-c="${c}"` : ''} data-k="${k}"
         style="margin:0 0 10px" onclick="mkTap('${k}',this)">· ${esc(x)}</p>`
         + (on && mkNote(k) ? `<div class="mknote"${c ? ` data-c="${c}"` : ''}><b>領受</b>　${esc(mkNote(k))}
@@ -6115,7 +6117,10 @@ function mkText(k){
   }
   if (p[0] === 'c'){
     const m = meta(+p[1].split(':')[0]) || {};
-    return (m.card || [])[+p[3]] || '';
+    const full = (m.card || [])[+p[3]] || '';
+    if (p.length < 5) return full;
+    const s = splitHTML(esc(full))[+p[4]] || '';
+    return s.replace(/<[^>]+>/g, '').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').trim();
   }
   if (p[0] === 'l'){                                   // 教學講義
     const raw = lesRaw(+p[1], +p[2], p[3]);
